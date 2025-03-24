@@ -2,54 +2,82 @@
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        Console.WriteLine("Welcome to the Quiz!");
-        User user = null;
-
-        while (user == null)
+        if (args.Length > 0 && args[0] == "--admin")
         {
-            Console.Write("1. Login\n2. Register\nChoose option: ");
-            string choice = Console.ReadLine();
+            AdminConsole.RunAdminTool();
+            return;
+        }
 
-            if (choice == "1")
+        Console.WriteLine("Welcome to the Quiz App!");
+        User currentUser = null;
+
+        while (currentUser == null)
+        {
+            Console.WriteLine("\n1. Login");
+            Console.WriteLine("2. Register");
+            Console.WriteLine("3. Exit");
+            Console.Write("Choose option: ");
+
+            switch (Console.ReadLine())
             {
-                user = RegistrationManager.Login();
-                if (user == null) Console.WriteLine("Invalid credentials, try again.");
-            }
-            else if (choice == "2")
-            {
-                user = RegistrationManager.Register();
+                case "1":
+                    currentUser = RegistrationManager.Login();
+                    if (currentUser == null)
+                        Console.WriteLine("Invalid credentials. Try again.");
+                    break;
+                case "2":
+                    currentUser = RegistrationManager.Register();
+                    break;
+                case "3":
+                    Environment.Exit(0);
+                    break;
+                default:
+                    Console.WriteLine("Invalid option. Try again.");
+                    break;
             }
         }
 
+        bool isAdmin = currentUser.Username == "admin";
+
         while (true)
         {
-            Console.WriteLine("\nMenu:");
-            Console.WriteLine("1. Start Quiz");
-            Console.WriteLine("2. Show My Results");
-            Console.WriteLine("3. Show Top 20 Results");
-            Console.WriteLine("4. Change Settings");
-            Console.WriteLine("5. Exit");
-
+            Console.WriteLine("\nMain Menu:");
+            Console.WriteLine("1. Start New Quiz");
+            Console.WriteLine("2. View My Results");
+            Console.WriteLine("3. View Top 20 Results");
+            Console.WriteLine("4. Change Password");
+            Console.WriteLine("5. Change Birth Date");
+            if (isAdmin) Console.WriteLine("6. Admin: Add/Edit Quiz");
+            Console.WriteLine("0. Exit");
             Console.Write("Your choice: ");
-            string option = Console.ReadLine();
 
-            switch (option)
+            string choice = Console.ReadLine();
+
+            switch (choice)
             {
                 case "1":
-                    QuizManager.StartQuiz(user);
+                    QuizManager.StartQuiz(currentUser);
                     break;
                 case "2":
-                    Console.WriteLine("Results will be implemented...");
+                    QuizManager.ShowUserResults(currentUser);
                     break;
                 case "3":
-                    QuizManager.ShowTopResults();
+                    Console.Write("Enter category: ");
+                    string category = Console.ReadLine();
+                    QuizManager.ShowTopResults(category);
                     break;
                 case "4":
-                    Console.WriteLine("Settings not implemented yet...");
+                    RegistrationManager.ChangePassword(currentUser);
                     break;
                 case "5":
+                    RegistrationManager.ChangeBirthDate(currentUser);
+                    break;
+                case "6" when isAdmin:
+                    QuizManager.AdminAddQuiz();
+                    break;
+                case "0":
                     Console.WriteLine("Goodbye!");
                     return;
                 default:
